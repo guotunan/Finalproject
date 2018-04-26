@@ -1,0 +1,67 @@
+---
+title: "Final Project"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+#Import data from excel
+```{r}
+#import "Originaldata.xlsx"
+library(dplyr)
+library(readxl)
+Dataset1 <- read_excel("Originaldata.xlsx")
+Dataset1
+```
+
+#Change certain variables from character to numeric for the later calculation purpose
+```{r}
+library(readxl)
+Dataset2 <- read_excel("Originaldata.xlsx", 
+    col_types = c("text", "text", "text", 
+        "text", "text", "text", "text", "text", 
+        "numeric", "text", "numeric", "text", 
+        "text", "text", "text", "numeric", 
+        "numeric", "text", "text", "text", 
+        "text", "text", "text", "text", "text", 
+        "text", "text", "text", "text", "text", 
+        "text", "text", "text"))
+View(Dataset2)
+```
+
+
+#Change column names
+```{r}
+#When import the original dataset, the headers are somehow appear in the first row and the in the header row, it shows "x__1","x__2" all the way to "x__32".To change back the real headers, we rename each columns. 
+
+
+colnames(Dataset2)<-c("NumoftotalQues","Sample","AStuId","PH","PN","PV","PST","PET","Latency","SMST","Hints","Incorrects","Corrects","AvgCorrects","Steps","Attempts","CorrectFAttmpts","Condition","KCsD","SwKCsD","KClistD","KCsIM","SwKCsIM","KClistIM","KCsSKC","SwKCsSKC","KClistSKC","KCsUs","SwKCsUs","KClistUs","KCsUsn","SwKCsUsn","KClistUsn")
+colnames(Dataset2)
+Dataset2
+```
+
+#Delete the first row to avoid "n/a" error
+
+```{r}
+#After changing certain columns from character to numeric, the mislocated headers mention above (shown in the first row instead of in the header row) changed to "n/a". Also, after rename each column, there are two rows presenting the same content (headers). In order to successfully do calculation in later steps as well as avoid duplicated names, the first row need to be deleted. 
+
+Dataset3 <- Dataset2[-c(1), ]
+Dataset3
+```
+
+
+#Delete unrelated variables
+```{r}
+#based on team's former analysis, only save "NumoftotalQues","AStuId", "Latency", "Hintsused","Attemptsused", "CorrectFAttmpts"
+
+#Create a new dataset: Dataset4
+Dataset4 <- select(Dataset3, NumoftotalQues, AStuId, Latency, Hints, Attempts, CorrectFAttmpts)
+Dataset4
+
+```
+
+#Data cleaning finished. 
