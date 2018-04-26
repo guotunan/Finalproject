@@ -7,6 +7,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r}
+install.packages("readxl")
+install.packages("knitr")
+```
 
 
 #Import data from excel
@@ -65,3 +69,16 @@ Dataset4
 ```
 
 #Data cleaning finished. 
+
+#Finding the number of questions answered
+dataset4
+```{r}
+
+as.data.frame(table(Dataset4$AStuId))
+```
+
+#Finding the number of questions answered correctly
+```{r}
+aggregate(CorrectFAttmpts~AStuId,data=Dataset4,FUN=sum)
+```
+
