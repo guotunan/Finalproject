@@ -43,7 +43,7 @@ View(Dataset2)
 #When import the original dataset, the headers are somehow appear in the first row and the in the header row, it shows "x__1","x__2" all the way to "x__32".To change back the real headers, we rename each columns. 
 
 
-colnames(Dataset2)<-c("NumoftotalQues","Sample","AStuId","PH","PN","PV","PST","PET","Latency","SMST","Hints","Incorrects","Corrects","AvgCorrects","Steps","Attempts","CorrectFAttmpts","Condition","KCsD","SwKCsD","KClistD","KCsIM","SwKCsIM","KClistIM","KCsSKC","SwKCsSKC","KClistSKC","KCsUs","SwKCsUs","KClistUs","KCsUsn","SwKCsUsn","KClistUsn")
+colnames(Dataset2)<-c("Quesno.","Sample","AStuId","PH","PN","PV","PST","PET","Latency","SMST","Hints","Incorrects","Corrects","AvgCorrects","Steps","Attempts","Correct_in_First_Attempt","Condition","KCsD","SwKCsD","KClistD","KCsIM","SwKCsIM","KClistIM","KCsSKC","SwKCsSKC","KClistSKC","KCsUs","SwKCsUs","KClistUs","KCsUsn","SwKCsUsn","KClistUsn")
 colnames(Dataset2)
 Dataset2
 ```
@@ -60,10 +60,10 @@ Dataset3
 
 #Delete unrelated variables
 ```{r}
-#based on team's former analysis, only save "NumoftotalQues","AStuId", "Latency", "Hintsused","Attemptsused", "CorrectFAttmpts"
+#based on team's former analysis, only save "Quesno.","AStuId", "Latency", "Hintsused","Attemptsused", "Correct_in_First_Attempt"
 
 #Create a new dataset: Dataset4
-Dataset4 <- select(Dataset3, NumoftotalQues, AStuId, Latency, Hints, Attempts, CorrectFAttmpts)
+Dataset4 <- select(Dataset3,Quesno.,AStuId, Latency, Hints, Attempts, Correct_in_First_Attempt)
 Dataset4
 
 ```
@@ -71,14 +71,92 @@ Dataset4
 #Data cleaning finished. 
 
 #Finding the number of questions answered
-dataset4
 ```{r}
 
-as.data.frame(table(Dataset4$AStuId))
+Dataset5 <- as.data.frame(table(Dataset4$AStuId))
+names(Dataset5)[1] <- 'AStuId'
+names(Dataset5)[2] <- 'Total_Questions_Answered'
+
 ```
 
 #Finding the number of questions answered correctly
 ```{r}
-aggregate(CorrectFAttmpts~AStuId,data=Dataset4,FUN=sum)
+Dataset6 <- aggregate(Correct_in_First_Attempt~AStuId,data=Dataset4,FUN=sum)
 ```
 
+#Calculating Base grade.Also a bit of more cleaning as we don't want big Anonymous student id's in our dataframe,so converting those id's to simple S1, S2, S3.. and so on
+```{r}
+Dataset7 <- merge(Dataset5, Dataset6, by="AStuId")
+Dataset7 <- data.frame(lapply(Dataset7, as.character), stringsAsFactors=FALSE)
+Dataset7$AStuId[Dataset7$AStuId=="Stu_08e80173bfe563cdaa1c51c3af183967"]<- "S1"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_0ca6c119fbc68309999c206abd6f6ce8"]<- "S2"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_20d015855bc9af67db1dc0feece33671"]<- "S3"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_29b6513f433dd556e3d2fd0c84ae1df7"]<- "S4"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_319a6ee2e48581a4911c6683ce38e66c"]<- "S5"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_38cc777ed5f1e4b1ee746787c3481d1c"]<- "S6"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_471da3aff346f24618e1b39a406a58cc"]<- "S7"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_537005374fa63386664e733eaa39a5e2"]<- "S8"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_5d32ab292b6894e8033f88d311c06934"]<- "S9"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_6f55653c379702a86c4cbf2f51223235"]<- "S10"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_76666c42b3bd62de26ef1075eeef2441"]<- "S11"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_77c9bcf1bd70d48b86557417affc8df5"]<- "S12"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_7c4f0c44b1530b231566e556afa1cdde"]<- "S13"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_7eeb4ea1ffb99f1ac3fed64192efd6d9"]<- "S14"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_82a5861804e0ea0912a99785eafdca34"]<- "S15"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_a641820befdca79ef8f74204af4bba6f"]<- "S16"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_ac395ff9f20429c1ecf7514e25c73f9a"]<- "S17"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_bdb07906752e4574c1a601326d4f4ec8"]<- "S18"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_c2dcd451a79cf7af8bc88a06e3c99f96"]<- "S19"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_c33a255f6fb92612765666934486c872"]<- "S20"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_d6c50e4a6ca0f6eee2ce1903ecc1a3e4"]<- "S21"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_f45af1c4bd5b0e6d14621a4fc92b48c7"]<- "S22"
+Dataset7$AStuId[Dataset7$AStuId=="Stu_f50a6fe4716e01ce297055b1a6990d26"]<- "S23"
+
+#
+Dataset7[,2] <- as.numeric(as.character(Dataset7[,2]))
+Dataset7[,3] <- as.numeric(as.character(Dataset7[,3]))
+Dataset7$Percentage <- with(Dataset7 , (Percentage = Correct_in_First_Attempt/Total_Questions_Answered ))
+```
+
+```{r}
+Dataset7$Grade <- ifelse(Dataset7$Percentage >=0.9, "A",ifelse(Dataset7$Percentage >=0.8,"B",ifelse(Dataset7$Percentage >=0.6 & Dataset7$Percentage>= 0.7 ,"C","D")))
+Dataset7
+```
+
+#Now we will find the modfied grade considering the other factors as well. These factors will be attempts, average time taken per attempt
+```{r}
+#removing the rows where latency(time taken for question)is very high number. The high numbers are unusual cases. Unusual in the sense that student has either left the tab or some othe reason.
+
+D8 <- Dataset4
+D8 <- subset(D8, Latency < 1000)
+D8 <- data.frame(lapply(D8, as.character), stringsAsFactors=FALSE)
+D8$AStuId[D8$AStuId=="Stu_08e80173bfe563cdaa1c51c3af183967"]<- "S1"
+D8$AStuId[D8$AStuId=="Stu_0ca6c119fbc68309999c206abd6f6ce8"]<- "S2"
+D8$AStuId[D8$AStuId=="Stu_20d015855bc9af67db1dc0feece33671"]<- "S3"
+D8$AStuId[D8$AStuId=="Stu_29b6513f433dd556e3d2fd0c84ae1df7"]<- "S4"
+D8$AStuId[D8$AStuId=="Stu_319a6ee2e48581a4911c6683ce38e66c"]<- "S5"
+D8$AStuId[D8$AStuId=="Stu_38cc777ed5f1e4b1ee746787c3481d1c"]<- "S6"
+D8$AStuId[D8$AStuId=="Stu_471da3aff346f24618e1b39a406a58cc"]<- "S7"
+D8$AStuId[D8$AStuId=="Stu_537005374fa63386664e733eaa39a5e2"]<- "S8"
+D8$AStuId[D8$AStuId=="Stu_5d32ab292b6894e8033f88d311c06934"]<- "S9"
+D8$AStuId[D8$AStuId=="Stu_6f55653c379702a86c4cbf2f51223235"]<- "S10"
+D8$AStuId[D8$AStuId=="Stu_76666c42b3bd62de26ef1075eeef2441"]<- "S11"
+D8$AStuId[D8$AStuId=="Stu_77c9bcf1bd70d48b86557417affc8df5"]<- "S12"
+D8$AStuId[D8$AStuId=="Stu_7c4f0c44b1530b231566e556afa1cdde"]<- "S13"
+D8$AStuId[D8$AStuId=="Stu_7eeb4ea1ffb99f1ac3fed64192efd6d9"]<- "S14"
+D8$AStuId[D8$AStuId=="Stu_82a5861804e0ea0912a99785eafdca34"]<- "S15"
+D8$AStuId[D8$AStuId=="Stu_a641820befdca79ef8f74204af4bba6f"]<- "S16"
+D8$AStuId[D8$AStuId=="Stu_ac395ff9f20429c1ecf7514e25c73f9a"]<- "S17"
+D8$AStuId[D8$AStuId=="Stu_bdb07906752e4574c1a601326d4f4ec8"]<- "S18"
+D8$AStuId[D8$AStuId=="Stu_c2dcd451a79cf7af8bc88a06e3c99f96"]<- "S19"
+D8$AStuId[D8$AStuId=="Stu_c33a255f6fb92612765666934486c872"]<- "S20"
+D8$AStuId[D8$AStuId=="Stu_d6c50e4a6ca0f6eee2ce1903ecc1a3e4"]<- "S21"
+D8$AStuId[D8$AStuId=="Stu_f45af1c4bd5b0e6d14621a4fc92b48c7"]<- "S22"
+D8$AStuId[D8$AStuId=="Stu_f50a6fe4716e01ce297055b1a6990d26"]<- "S23"
+D8[,3] <- as.numeric(as.character(D8[,3]))
+D8[,4] <- as.numeric(as.character(D8[,4]))
+D8[,5] <- as.numeric(as.character(D8[,5]))
+D8[,6] <- as.numeric(as.character(D8[,6]))
+
+
+```
