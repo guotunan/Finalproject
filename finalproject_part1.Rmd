@@ -158,5 +158,50 @@ D8[,4] <- as.numeric(as.character(D8[,4]))
 D8[,5] <- as.numeric(as.character(D8[,5]))
 D8[,6] <- as.numeric(as.character(D8[,6]))
 
+#Putting the no. of attempts in one column when the student has got question correct in first attempt.
+D8$Attempts[D8$Correct_in_First_Attempt==1] <- 1
+D8$timeperattempt <- with(D8, (timeperattempt = Latency/Attempts))
+x <-median(D8$timeperattempt,na.rm = FALSE)
+x
+y <- mean(D8$timeperattempt,na.rm = FALSE)
+y
+#some values for 'timeperattempt' variable have come out to be 'zero' even though the student has got question right in the first attempt. This seems to be a bit odd. So considering the fact that student has got the question correct we are assigning that value to be median value, as we would be using 15 secs(which is close to median) as value to be the threshold value in our model to decide modified grade.
 
+D8$timeperattempt[D8$timeperattempt==0] <- 12
+
+w <-median(D8$Attempts,na.rm = FALSE)
+z <- mean(D8$Attempts,na.rm = FALSE)
+w
+z
+```
+
+```{r}
+#Assigning modified score(Score1) based on number of attempts according to rule 'No. of attempts = 1 =1 point,No. of attempts = 2 =0.8 points,No. of attempts = 3 = 0.5 points,No. of attempts = 4 or more =0 points'. This gives us a quadratic equation. We did not want a liner curve for this score.
+D8$Score1 <- NA
+D8$Score1[D8$Attempts ==1] <-1
+D8$Score1[D8$Attempts ==2] <-0.8
+D8$Score1[D8$Attempts ==3] <-0.5
+D8$Score1[D8$Attempts >=4] <-0
+D8
+```
+
+```{r}
+#Assigning modified score (score2) based on the timeperattempt variable according to the rule'if time per attempt is less than 15 secs then bonus of 0.2 points othewise no bonus points.'
+D8$Score2 <- NA
+D8$Score2[D8$timeperattempt <= 15] <-0.2
+D8$Score2[D8$timeperattempt  >15] <-0
+
+#fiding final score i.e score1 + score2
+
+D8$finalmodifiedscore <- with(D8, (finalscore = Score1 + Score2))
+D9 <- aggregate(finalmodifiedscore~AStuId,data=D8,FUN=sum)
+D10 <- merge(D9,Dataset7,by="AStuId")
+D10$modifiedPercentage <- with(D10 , (modifiedPercentage = finalmodifiedscore/Total_Questions_Answered ))
+
+#finding final grade
+D10$modifiedGrade <- ifelse(D10$modifiedPercentage >=0.9, "A",ifelse(D10$modifiedPercentage >=0.8,"B",ifelse(D10$modifiedPercentage >=0.6 & D10$modifiedPercentage>= 0.7 ,"C","D")))
+D10 <- subset(D10, Total_Questions_Answered > 50)
+
+
+Dfinalcomparison <- D10
 ```
