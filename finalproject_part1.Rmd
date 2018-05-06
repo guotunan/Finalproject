@@ -147,7 +147,7 @@ names(Dataset5)[2] <- 'Total_Questions_Answered'
 
 ```
 
-#Finding the number of questions answered correctly
+#Finding the number of questions answered correctly in first attempt
 ```{r}
 Dataset6 <- aggregate(Correct_in_First_Attempt~AStuId,data=Dataset4,FUN=sum)
 ```
@@ -239,32 +239,43 @@ D8$timeperattempt[D8$timeperattempt==0] <- 12
 
 w <-median(D8$Attempts,na.rm = FALSE)
 z <- mean(D8$Attempts,na.rm = FALSE)
-w
-z
+
+#summarising the no.of questions answered
+D8_summary <-D
+names(D8_summary)[2] <- 'modified_questions_answered'
 ```
 
 ```{r}
 #Assigning modified score(Score1) based on number of attempts according to rule 'No. of attempts = 1 =1 point,No. of attempts = 2 =0.8 points,No. of attempts = 3 = 0.5 points,No. of attempts = 4 or more =0 points'. This gives us a quadratic equation. We did not want a liner curve for this score.
 D8$Score1 <- NA
 D8$Score1[D8$Attempts ==1] <-1
-D8$Score1[D8$Attempts ==2] <-0.8
-D8$Score1[D8$Attempts ==3] <-0.5
-D8$Score1[D8$Attempts >=4] <-0
+D8$Score1[D8$Attempts ==2] <-0.5
+D8$Score1[D8$Attempts >=3] <-0
 D8
 ```
 
 ```{r}
 #Assigning modified score (score2) based on the timeperattempt variable according to the rule'if time per attempt is less than 15 secs then bonus of 0.2 points othewise no bonus points.'
 D8$Score2 <- NA
-D8$Score2[D8$timeperattempt <= 15] <-0.2
-D8$Score2[D8$timeperattempt  >15] <-0
+D8$Score2[D8$timeperattempt <= 12] <-0.05
+D8$Score2[D8$timeperattempt >12] <-0
 
-#fiding final score i.e score1 + score2
+#finding final score i.e score1 + score2
 
-D8$finalmodifiedscore <- with(D8, (finalscore = Score1 + Score2))
+D8$finalmodifiedscore <- with(D8, (finalmodifiedscore = Score1 + Score2))
 D9 <- aggregate(finalmodifiedscore~AStuId,data=D8,FUN=sum)
+
+D1 <- aggregate(Attempts~AStuId,data=D8,FUN=mean)
+names(D1)[2] <- 'meanattempts'
+D2 <- aggregate(timeperattempt~AStuId,data=D8,FUN=mean)
+names(D2)[2] <- 'meantimeperattempt'
+
 D10 <- merge(D9,Dataset7,by="AStuId")
-D10$modifiedPercentage <- with(D10 , (modifiedPercentage = finalmodifiedscore/Total_Questions_Answered ))
+D10 <- merge(D10,D8_summary,by ="AStuId")
+D10 <- merge(D10,D1, by ="AStuId")
+D10 <- merge(D10,D2, by ="AStuId")
+
+D10$modifiedPercentage <- with(D10, (modifiedpercentage = finalmodifiedscore/modified_questions_answered))
 
 #finding final grade
 D10$modifiedGrade <- ifelse(D10$modifiedPercentage >=0.9, "A",ifelse(D10$modifiedPercentage >=0.8,"B",ifelse(D10$modifiedPercentage >=0.6 & D10$modifiedPercentage>= 0.7 ,"C","D")))
