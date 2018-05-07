@@ -9,19 +9,17 @@ output: html_notebook
 
 ### 1. DATA
 
-**Give a description of the data you chose to analyze. Include anything you know about the source of the data (who generated, in what context, doing what activities) and its structure (what does each column and row represent). Include code that shows a useful illustation of the data (you could do this by showing the head of the data, or listing all column names, or using the glimpse function)**
-
-Data History
+**Data History**
 
 This data came from “OLI Elementary Chinese I” online course at Carnegie Mellon University from Jan 15, 2006 - Dec 11, 2006. “OLI”--Open Learning Initiative is a grant-funded group at Carnegie Mellon University, offering innovative online courses to anyone who wants to learn or teach. “Elementary Chinese I” aims to help beginners develop communicative competence in the basic four skills (listening, speaking, reading and writing) and culture of Chinese. The course curriculum is organized around the 5 Cs principles of the National Standards for Foreign Language Education for the 21st Century – Communication, Cultures, Comparisons, Connections and Communities. “Elementary Chinese I” covers 8 units. The principal investigator was Suemei Wu. 
 
-Data Description
+**Data Description**
 
-General Info
+**General Info**
 
 Number of students = 23, Number of unique steps = 255, Total number of steps = 3500, Total number of transactions = 6457, Total number of student hours = 38.51, Knowledge Component Models = 5 which are 1. Defalut(21 KCs) 2. Item model (255 KCs) 3. Single KC(1 KC) 4.Unique step(255 KCs) 5. Unique step new(255 KCs)
 
-Dataset info
+**Dataset info**
 
 Row: Each row represents a specific question answered by a specific student
 
@@ -59,18 +57,23 @@ Rest all of the columns related similar to the columns related to KCs as above.
 **Can we develop a comprehensive grading system based on multiple factors instead of just numbers of correct answers and how is it different from the traditional grading system?**
 
 ### 3. APPROACH
-**To solve this problem our approach is that first we will calculate the base grade the normal way, in this case as the student is getting question correct after certain hints and attempts so we are calculating 'base grade'according to the number of questions got correct in first attempt and how many attempted. Then we will find a modified grade which wiil take not only these two factors but other factors as well. The model to calculate modified grade is as follows:
+
+**Many traditional grading system only use number of correct answers/total questions as the only factor to define students' performance. This causes a problem that most students are not accurately represented, especially in online courses where students can have multiple attempts and hints in each question. By taking the inspiration from math problems where, even if the answer is incorrect but the approach is, students can still earn partial credits. We developed a more comprehensive grading system by adding multiple factors in to see if we can give students a more accurate performance grade**
+
+
+**To solve this problem our approach is that first we will calculate the base grade the normal way, in this case as the student is getting question correct after certain hints and attempts so we are calculating 'base grade'according to the number of questions got correct in first attempt and how many attempted. Then we will find a modified grade which wiil take not only these two factors but other factors as well. The model to calculate modified grade is as follows:**
 
 If the student gets question right in 1st attempt = 1 point
-If the student gets question right in 2nd attempt = 0.8 points
-If the student gets question right in 3rd attempt = 0.5 points
-If the student gets question right in 4th attempt = 0 Points
+If the student gets question right in 2nd attempt = 0.5 points
+If the student gets question right in 3 or more attempts = 0 Points
 
-Also 
+Also
 
-If the time taken per attempt is less than 15 secs( why?explained in the code below) bonus of 0.2 points, else 0
+If the time taken per attempt is less than 12 secs( why?explained in the code below) bonus of 0.05 points, else 0
 
-Then we will compare the grades of the students to see whether upto what extent these factors contribute to the new grading system. We are developing this new grading system because we feel that cuurent grading system fails to capture certain aspects of learning and the varaibles which we have chosen to develop new grading explain us about the adaptiveness, grasp and comprehension of the students over the problems.
+Then we will compare the grades of the students to see whether upto what extent these factors contribute to the new grading system.
+
+
 
 ### 4. PROCESS, RESULTS & INTEPRETATION
 ```{r setup, include=FALSE}
@@ -193,7 +196,7 @@ Dataset7
 
 #Now we will find the modfied grade considering the other factors as well. These factors will be attempts, average time taken per attempt
 ```{r}
-#removing the rows where latency(time taken for question)is very high number. The high numbers are unusual cases. Unusual in the sense that student has either left the tab or some othe reason.
+#removing the rows where latency(time taken for question)is very high number. The high numbers are unusual cases. Unusual in the sense that student has either left the tab or some other reason.
 
 D8 <- Dataset4
 D8 <- subset(D8, Latency < 1000)
@@ -246,7 +249,7 @@ names(D8_summary)[2] <- 'modified_questions_answered'
 ```
 
 ```{r}
-#Assigning modified score(Score1) based on number of attempts according to rule 'No. of attempts = 1 =1 point,No. of attempts = 2 =0.8 points,No. of attempts = 3 = 0.5 points,No. of attempts = 4 or more =0 points'. This gives us a quadratic equation. We did not want a liner curve for this score.
+#Assigning modified score(Score1) based on number of attempts according to rule.
 D8$Score1 <- NA
 D8$Score1[D8$Attempts ==1] <-1
 D8$Score1[D8$Attempts ==2] <-0.5
@@ -288,11 +291,33 @@ Dfinalcomparison <- D10
 Dfinalcomparison
 ```
 ### 5. CONCLUSION: 
-Based on our analysis, a lot more students ended up with A’s than the baseline data set of unaltered grades, going from 2 all the way up to 10 students earning A’s, most of who were in the B or C range previously. The two important results were the elimination of the C grade and the reduced number of D’s from 5 to 3. While these show that our system has promise, since the point of this new grading system was to help more accurately reflect student performance based on factors outside of the binary right or wrong, automatically boosting half of the remaining students to the highest grade may not be the best solution. This could have happened for two possible reasons: the first is that we may have put too much emphasis on the speed at which the questions is answered, which was the only way to gain an increase in points. The second is that there may have been a factor in the data that we overlooked.
+
+**Every student get a better grade. More students get “A”**
+
+a)Traditional grade standard: two “A”s out of 16 students
+b)New grade standard: twelve “A”s out of 16 students
+
+**The reason why there are so many “A”s and why some students even moved from “D” to “A” is because: **
+
+a)The new system team designed only add points to original scores, there is are no opportunities to reduce points. In another words, each student cannot get a worse grade than what they already had. 
+
+b)The huge “jump” exists because team rewards students who gets correct answer on the second attempt, which means that besides their original score (correct at first attempts), they can add another 0.5 point in each of the remaining questions that being ignored by traditional grade standard. The more questions they answered, the more points they will have. For example, for S18, they had 158 questions correct at first attempts. But they answered 235 questions overall which means for every remaining question, as long as they got correct in two attempts, they could get extra 0.5 point per question. Although based on the table, it looks inappropriate by moving a student from “D” to “A”, but it is reasonable to give half points to students who got correct with second attempts. Team thought those students should be given partial credits and rewarded them by answering more questions. 
+
+**Students’ performances can be better recognized**
+
+Team also listed the mean number of attempts and the mean time in each attempt to show a general picture of how each student performed. Smaller numbers in both categories usually indicated the student had a better performance.
 
 ### 6. REFLECTION
 
-The first major hurdle that we faced as a group was finding the right data. Originally, we wanted to work with data from 538, but, while interesting, did not apply to learning analytics. Thanks to Avi, we started to work with data from Carnegie Mellon’s online courses. The second issue that we came across was working with functions we were not completely familiar with. Thankfully, Google is a wonderful resource. The third issue was finding the best values to affect a students grade. The values changed based on what we thought would work best, but ultimately it ended up being a gradient curve based on the number of attempts the learner would make and how long they would take to get the correct answer to the question.  If we had more time, we would want to do a decision tree on figuring out which aspect of our new grading system have the most impact on helping a borderline student succeed and which have the least. We would also keep trying different values for altering the grades to make it have a more balanced distribution.
+We encountered several issues during the process: 
+
+1. Finding the right data. Originally, we wanted to work with data from 538, but, while interesting, did not apply to learning analytics. Thanks to Avi, we started to work with data from Carnegie Mellon’s online courses.
+
+2. Analyze the data to find weights (cut lines) in different variables. After identifying the variables team would use to develop a new grading system, we started deciding on the weights. Team calculated both mean and median of each variable and based on that, we tried both linear and nonlinear (parabola) lines to distribute our weights. The final decision we made was to use linear one because the distribution was simple and straightforward--1, 0.5, 0. There was no need to use a nonlinear method. 
+
+3. Using the right functions. We encountered this issue several times and by google, asking instructors and discussing as a team, we managed to do all the necessary coding in R. 
+
+4. Finding the best values to affect a students grade. Even after some changes and attempts, we found a relatively reasonable solution, the changes this new system made for some students (from C to A or D to A) still seemed inappropriate though we already explained why in the previous section. If team had more time, we would further optimize the system by maybe changing the grade standard or adding more standards (A-, B+, etc.). We also want to do a decision tree on figuring out which aspect of our new grading system have the most impact on helping a borderline student succeed and which have the least. 
 
 
 
