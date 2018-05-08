@@ -81,8 +81,7 @@ Then we will compare the grades of the students to see whether upto what extent 
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r,eval=F}
-
+```{r}
 install.packages("readxl")
 install.packages("knitr")
 ```
@@ -109,6 +108,7 @@ Dataset2 <- read_excel("Originaldata.xlsx",
         "text", "text", "text", "text", "text", 
         "text", "text", "text", "text", "text", 
         "text", "text", "text"))
+View(Dataset2)
 ```
 
 
@@ -197,7 +197,7 @@ Dataset7
 
 #Now we will find the modfied grade considering the other factors as well. These factors will be attempts, average time taken per attempt
 ```{r}
-#removing the rows where latency (time taken for question) is very high number. The high numbers are unusual cases. Unusual in the sense that student has either left the tab or some other reason.
+#removing the rows where latency(time taken for question)is very high number. The high numbers are unusual cases. Unusual in the sense that student has either left the tab or some other reason.
 
 D8 <- Dataset4
 D8 <- subset(D8, Latency < 1000)
@@ -245,13 +245,8 @@ w <-median(D8$Attempts,na.rm = FALSE)
 z <- mean(D8$Attempts,na.rm = FALSE)
 
 #summarising the no.of questions answered
-D <- D8 %>% 
-  group_by(AStuId) %>% 
-  summarise(n = n()) %>% 
-  rename(modified_questions_answered = n)
 D8_summary <-D
-class(D8_summary)
-str(D8_summary)
+names(D8_summary)[2] <- 'modified_questions_answered'
 ```
 
 ```{r}
