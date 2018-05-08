@@ -2,7 +2,9 @@
 title: "Final Project"
 author: "Tunan, Austin, Avi"
 date: "Your Submission Date Here"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 # Alternate Grading System
 ## By Tunan, Austin, Avi
