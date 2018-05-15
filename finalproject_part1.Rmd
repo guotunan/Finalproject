@@ -232,6 +232,8 @@ D8[,6] <- as.numeric(as.character(D8[,6]))
 
 #Putting the no. of attempts in one column when the student has got question correct in first attempt.
 D8$Attempts[D8$Correct_in_First_Attempt==1] <- 1
+D8<-D8[!(D8$Attempts==1 & D8$Correct_in_First_Attempt==0),]
+
 D8$timeperattempt <- with(D8, (timeperattempt = Latency/Attempts))
 x <-median(D8$timeperattempt,na.rm = FALSE)
 x
@@ -264,7 +266,7 @@ D8
 ```
 
 ```{r}
-#Assigning modified score (score2) based on the timeperattempt variable according to the rule'if time per attempt is less than 15 secs then bonus of 0.2 points othewise no bonus points.'
+#Assigning modified score (score2) based on the timeperattempt variable according to the rule'if time per attempt is less than 12 secs then bonus of 0.05 points othewise no bonus points.'
 D8$Score2 <- NA
 D8$Score2[D8$timeperattempt <= 12] <-0.05
 D8$Score2[D8$timeperattempt >12] <-0
@@ -301,17 +303,20 @@ Dfinalcomparison
 **Every student get a better grade. More students get “A”**
 
 a)Traditional grade standard: two “A”s out of 16 students
-b)New grade standard: twelve “A”s out of 16 students
+b)New grade standard: ten “A”s out of 16 students
 
-**The reason why there are so many “A”s and why some students even moved from “D” to “A” is because: **
+**The reason why there are so many “A”s and why some students even moved from "C" to "A" or “D” to “B” is because: **
 
 a)The new system team designed only add points to original scores, there is are no opportunities to reduce points. In another words, each student cannot get a worse grade than what they already had. 
 
-b)The huge “jump” exists because team rewards students who gets correct answer on the second attempt, which means that besides their original score (correct at first attempts), they can add another 0.5 point in each of the remaining questions that being ignored by traditional grade standard. The more questions they answered, the more points they will have. For example, for S18, they had 158 questions correct at first attempts. But they answered 235 questions overall which means for every remaining question, as long as they got correct in two attempts, they could get extra 0.5 point per question. Although based on the table, it looks inappropriate by moving a student from “D” to “A”, but it is reasonable to give half points to students who got correct with second attempts. Team thought those students should be given partial credits and rewarded them by answering more questions. 
+b)The huge “jump”(two letter grade jump) exists because team rewards students who gets correct answer on the second attempt, which means that besides their original score (correct at first attempts), they can add another 0.5 point in each of the remaining questions that being ignored by traditional grade standard. The more questions they answer, the more points they will have. For example, for S18, he had 158 questions correct at first attempts. But he answered 235 questions overall, which means for every remaining question, as long as he gets correct in two attempts, he got extra 0.5 point per question.Team thought those students should be given partial credits and rewarded them by answering more questions. 
+
 
 **Students’ performances can be better recognized**
 
 Team also listed the mean number of attempts and the mean time in each attempt to show a general picture of how each student performed. Smaller numbers in both categories usually indicated the student had a better performance.
+
+ALSO IF WE LOOK AT THE STUDENTS WHO HAD BASE GRADE D , TWO STUDENTS ARE JUMPING FROM BASE GRADE D TO MODIFIED GRADE B , 1 STUDENT'S GRADE REMAINS SAME , 1 STUDENT IMPROVES TO C FROM D. THIS EXPLAINS THAT THE FACTORS CHOSEN CAN HELP US DIFFERENTIATE BETWEEN THE THE STUDENTS. ALSO THESE FACTORS DO NOT CHANGE THE GRADE OF THE STUDENTS WHO WERE ORIGINALLY AT SAME LEVEL TO SAME MODIFIED LEVEL. THIS VALIDATES OUR GRADING MODEL TO A CERTAIN EXTENT. 
 
 ### 6. REFLECTION
 
